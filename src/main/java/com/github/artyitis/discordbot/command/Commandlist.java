@@ -14,7 +14,7 @@ import com.github.artyitis.discordbot.command.music.Play;
 import com.github.artyitis.discordbot.command.music.Queue;
 import com.github.artyitis.discordbot.command.music.Resume;
 import com.github.artyitis.discordbot.command.music.Skip;
-import com.github.artyitis.discordbot.command.music.Source;
+import com.github.artyitis.discordbot.command.music.Song;
 
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
@@ -36,7 +36,7 @@ public class Commandlist extends ArrayList<Command> {
         add(new Resume());
         add(new Queue());
         add(new Skip());
-        add(new Source());
+        add(new Song());
     }
 
     public static Commandlist getInstance() {
