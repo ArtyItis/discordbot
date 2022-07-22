@@ -90,7 +90,10 @@ public class STATICS {
     // ------------------------------------------------------------------------------------------------
     public static final String[] SKIP = { "skip", "skip current track" };
     // ------------------------------------------------------------------------------------------------
-    public static final String[] SOURCE = { "source", "Returns the title of the currently playing song." };
+    public static final String[] SONG = { "song", "provide song information" };
+    public static final String[] SONG_SUB_SOURCE = { "source", "Returns the title of the currently playing song." };
+    public static final String[] SONG_SUB_TIMESTAMP = { "timestamp", "Returns the current timestamp of the currently playing song." };
+
 
 
 }
