@@ -88,8 +88,8 @@ public class TrackScheduler extends AudioEventAdapter {
 	 * @param playlist the playlist
 	 */
 	public void addToQueue(final List<AudioTrack> playlist) {
-		for (AudioTrack audioTrack : playlist) {
-			queue.offer(audioTrack);
+		for (int i = playlist.size() - 1; i > -1; i--) {
+			queue.offer(playlist.get(i));
 		}
 		player.startTrack(queue.poll(), true);
 	}
