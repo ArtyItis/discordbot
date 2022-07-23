@@ -44,7 +44,7 @@ public class Song extends CommandMusic {
                 if (second.length() < 2) {
                     second = "0" + second;
                 }
-                commandAction = "current timestamp:" + minutes + ":" + second + " minutes";
+                commandAction = "current timestamp: " + minutes + ":" + second + " minutes";
             }
         }
         MessageHelper.replyMusic(event.getMember(), event.deferReply(), name + " " + subcommandName, commandAction,
