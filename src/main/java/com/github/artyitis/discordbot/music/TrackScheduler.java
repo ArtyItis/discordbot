@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
@@ -21,7 +21,7 @@ public class TrackScheduler extends AudioEventAdapter {
 	private final AudioPlayer player;
 
 	/** The queue. */
-	private final BlockingQueue<AudioTrack> queue;
+	private final LinkedBlockingDeque<AudioTrack> queue;
 
 	/**
 	 * Instantiates a new track scheduler.
@@ -30,34 +30,56 @@ public class TrackScheduler extends AudioEventAdapter {
 	 */
 	public TrackScheduler(final AudioPlayer player) {
 		this.player = player;
-		queue = new LinkedBlockingQueue<>();
+		queue = new LinkedBlockingDeque<>();
 	}
 
 	/**
-	 * Adds the on top of queue.
+	 * Add the next track to queue or play right away if nothing is in the queue.
+	 *
+	 * @param track The track to play or add to queue.
+	 */
+	public void queue(final AudioTrack track) {
+		// Calling startTrack with the noInterrupt set to true will start the track only
+		// if nothing is currently playing. If
+		// something is playing, it returns false and does nothing. In that case the
+		// player was already playing so this
+		// track goes to the queue instead.
+		if (!player.startTrack(track, true)) {
+			queue.offer(track);
+		}
+	}
+
+	/**
+	 * Start the next track, stopping the current one if it is playing.
+	 */
+	public void nextTrack() {
+		// Start the next track, regardless of if something is already playing or not.
+		// In case queue was empty, we are
+		// giving null to startTrack, which is a valid argument and will simply stop the
+		// player.
+		player.startTrack(queue.poll(), false);
+	}
+
+	/**
+	 * Add track on top of queue.
 	 *
 	 * @param track the track
 	 */
-	public void addOnTopOfQueue(final AudioTrack track) {
-		final List<AudioTrack> tmp = new ArrayList<>();
-		tmp.add(track);
-		tmp.addAll(queue);
-		queue.clear();
-		queue.addAll(tmp);
-
+	public void addOnTopOfQueue(final AudioTrack track, boolean noInterrupt) {
+		if (!player.startTrack(track, noInterrupt))
+			queue.offerFirst(track);
 	}
 
 	/**
-	 * Adds the on top of queue.
+	 * Add playlist on top of queue.
 	 *
 	 * @param playlist the playlist
 	 */
-	public void addOnTopOfQueue(final List<AudioTrack> playlist) {
-		final List<AudioTrack> tmp = new ArrayList<>();
-		tmp.addAll(playlist);
-		tmp.addAll(queue);
-		queue.clear();
-		queue.addAll(tmp);
+	public void addOnTopOfQueue(final List<AudioTrack> playlist, boolean noInterrupt) {
+		for (int i = playlist.size() - 1; i > -1; i--) {
+			queue.offerFirst(playlist.get(i));
+		}
+		player.startTrack(queue.poll(), noInterrupt);
 	}
 
 	/**
@@ -66,7 +88,10 @@ public class TrackScheduler extends AudioEventAdapter {
 	 * @param playlist the playlist
 	 */
 	public void addToQueue(final List<AudioTrack> playlist) {
-		queue.addAll(playlist);
+		for (AudioTrack audioTrack : playlist) {
+			queue.offer(audioTrack);
+		}
+		player.startTrack(queue.poll(), true);
 	}
 
 	/**
@@ -83,19 +108,6 @@ public class TrackScheduler extends AudioEventAdapter {
 	 */
 	public BlockingQueue<AudioTrack> getQueue() {
 		return queue;
-	}
-
-	/**
-	 * Start the next track, stopping the current one if it is playing.
-	 */
-	public void nextTrack() {
-		// Start the next track, regardless of if something is already playing or not.
-		// In case queue was empty, we are
-		// giving null to startTrack, which is a valid argument and will simply stop the
-		// player.
-		player.stopTrack();
-		player.startTrack(queue.poll(), false);
-
 	}
 
 	/**
@@ -138,29 +150,11 @@ public class TrackScheduler extends AudioEventAdapter {
 	}
 
 	/**
-	 * Add the next track to queue or play right away if nothing is in the queue.
-	 *
-	 * @param track The track to play or add to queue.
-	 */
-	public void queue(final AudioTrack track) {
-		// Calling startTrack with the noInterrupt set to true will start the track only
-		// if nothing is currently playing. If
-		// something is playing, it returns false and does nothing. In that case the
-		// player was already playing so this
-		// track goes to the queue instead.
-		track.setPosition(0);
-		if (!player.startTrack(track, true)) {
-			queue.offer(track);
-		}
-	}
-
-	/**
 	 * Shuffle.
 	 */
 	public void shuffle() {
 		final ArrayList<AudioTrack> tmp = new ArrayList<>();
-		tmp.addAll(queue);
-		queue.clear();
+		queue.drainTo(tmp);
 		Collections.shuffle(tmp);
 		queue.addAll(tmp);
 	}

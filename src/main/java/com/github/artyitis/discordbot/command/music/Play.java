@@ -62,11 +62,10 @@ public class Play extends CommandMusic {
                             commandAction = track.getInfo().title + " has been added to queue";
                         }
                     } else if (subcommandName.equals(STATICS.PLAY_SUB_NEXT[0])) {
-                        musicManager.scheduler.addOnTopOfQueue(track);
+                        musicManager.scheduler.addOnTopOfQueue(track, true);
                         commandAction = track.getInfo().title + " is now at the top of the queue";
                     } else if (subcommandName.equals(STATICS.PLAY_SUB_NOW[0])) {
-                        musicManager.scheduler.addOnTopOfQueue(track);
-                        musicManager.scheduler.nextTrack();
+                        musicManager.scheduler.addOnTopOfQueue(track, false);
                         commandAction = "playing " + track.getInfo().title;
                     }
                     trackInfo = track.getInfo();
@@ -76,14 +75,11 @@ public class Play extends CommandMusic {
                 public void playlistLoaded(AudioPlaylist playlist) {
                     final List<AudioTrack> tracks = playlist.getTracks();
                     if (subcommandName.equals(STATICS.PLAY_SUB_QUEUE[0])) {
-                        musicManager.scheduler.queue(tracks.remove(0));
                         musicManager.scheduler.addToQueue(tracks);
                     } else if (subcommandName.equals(STATICS.PLAY_SUB_NEXT[0])) {
-                        musicManager.scheduler.addOnTopOfQueue(tracks);
-
+                        musicManager.scheduler.addOnTopOfQueue(tracks, true);
                     } else if (subcommandName.equals(STATICS.PLAY_SUB_NOW[0])) {
-                        musicManager.scheduler.addOnTopOfQueue(tracks);
-                        musicManager.scheduler.nextTrack();
+                        musicManager.scheduler.addOnTopOfQueue(tracks, false);
                     }
                     commandAction = "added playlist " + playlist.getName() + " to queue";
                     trackInfo = null;
